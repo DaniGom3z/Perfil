@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id                 Int                 @id @default(autoincrement())
+  nombreUsuario      String
+  correo             String              @unique
+  contraseñaHash     String
+  nivelLector        String
+  puntuacionTotal    Int                 @default(0)
+  rango              String              @default("lector")
+  edad               Int
+  generoSexual       String
+  objetivoLector     String
+  paginasDiarias     Int
+  objetivoSemanal    String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  historialBusquedas HistorialBusqueda[]
+  generosFavoritos   GeneroFavorito[]
+}
+
+model HistorialBusqueda {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  termino   String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+}
+
+model GeneroFavorito {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  genero    String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+}
