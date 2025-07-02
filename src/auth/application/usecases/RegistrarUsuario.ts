@@ -1,11 +1,15 @@
 import { UsuarioRepository } from '../../domain/repositories/UsuarioRepository';
 import { Usuario } from '../../domain/entities/Usuario';
 import { AuthService } from '../../domain/services/AuthService';
+import { EventPublisher } from '../../domain/events/EventPublisher';
+
 
 export class RegistrarUsuario {
   constructor(
     private readonly usuarioRepo: UsuarioRepository,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly publisher: EventPublisher
+
   ) {}
 
   async execute(
@@ -41,6 +45,16 @@ export class RegistrarUsuario {
       objetivoSemanal
     );
 
-    return await this.usuarioRepo.crear(nuevoUsuario);
+    const creado = await this.usuarioRepo.crear(nuevoUsuario);
+
+
+     // Emitir evento
+    await this.publisher.publish('usuario.registrado', {
+      idUsuario: creado.id,
+      correo: creado.correo,
+      fechaRegistro: new Date()
+    });
+
+    return creado;
   }
 }

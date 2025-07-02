@@ -15,10 +15,12 @@ const CambiarContrasena_1 = require("../../../application/usecases/CambiarContra
 const ObtenerPerfil_1 = require("../../../application/usecases/ObtenerPerfil");
 const UsuarioPrismaRepository_1 = require("../../repositories/UsuarioPrismaRepository");
 const AuthService_1 = require("../../../domain/services/AuthService");
+const RabbitMQEventPublisher_1 = require("../../bus/RabbitMQEventPublisher");
 // Inyección de dependencias manual (puedes mover a un archivo factory si prefieres)
 const usuarioRepo = new UsuarioPrismaRepository_1.UsuarioPrismaRepository();
 const authService = new AuthService_1.AuthService();
-const registrarUsuario = new RegistrarUsuario_1.RegistrarUsuario(usuarioRepo, authService);
+const eventPublisher = new RabbitMQEventPublisher_1.RabbitMQEventPublisher();
+const registrarUsuario = new RegistrarUsuario_1.RegistrarUsuario(usuarioRepo, authService, eventPublisher);
 const iniciarSesion = new IniciarSesion_1.IniciarSesion(usuarioRepo, authService);
 const actualizarPerfil = new ActualizarPerfil_1.ActualizarPerfil(usuarioRepo);
 const cambiarContrasena = new CambiarContrasena_1.CambiarContrasena(usuarioRepo, authService);

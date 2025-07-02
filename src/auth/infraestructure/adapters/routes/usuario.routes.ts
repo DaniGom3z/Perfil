@@ -13,12 +13,14 @@ import { ObtenerPerfil } from '../../../application/usecases/ObtenerPerfil';
 
 import { UsuarioPrismaRepository } from '../../repositories/UsuarioPrismaRepository';
 import { AuthService } from '../../../domain/services/AuthService';
+import { RabbitMQEventPublisher } from '../../bus/RabbitMQEventPublisher';   
 
 // Inyección de dependencias manual (puedes mover a un archivo factory si prefieres)
 const usuarioRepo = new UsuarioPrismaRepository();
 const authService = new AuthService();
+const eventPublisher = new RabbitMQEventPublisher();
 
-const registrarUsuario = new RegistrarUsuario(usuarioRepo, authService);
+const registrarUsuario = new RegistrarUsuario(usuarioRepo, authService,eventPublisher);
 const iniciarSesion = new IniciarSesion(usuarioRepo, authService);
 const actualizarPerfil = new ActualizarPerfil(usuarioRepo);
 const cambiarContrasena = new CambiarContrasena(usuarioRepo, authService);

@@ -12,9 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegistrarUsuario = void 0;
 const Usuario_1 = require("../../domain/entities/Usuario");
 class RegistrarUsuario {
-    constructor(usuarioRepo, authService) {
+    constructor(usuarioRepo, authService, publisher) {
         this.usuarioRepo = usuarioRepo;
         this.authService = authService;
+        this.publisher = publisher;
     }
     execute(nombre, correo, passwordPlano, edad, generoSexual, generosFavoritos, nivelLector, objetivoLector, paginasDiarias, objetivoSemanal) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +24,14 @@ class RegistrarUsuario {
                 throw new Error('Ya existe un usuario con ese correo');
             const hash = yield this.authService.hashear(passwordPlano);
             const nuevoUsuario = new Usuario_1.Usuario(nombre, correo, hash, nivelLector, 0, 'lector', [], edad, generoSexual, generosFavoritos, objetivoLector, paginasDiarias, objetivoSemanal);
-            return yield this.usuarioRepo.crear(nuevoUsuario);
+            const creado = yield this.usuarioRepo.crear(nuevoUsuario);
+            // Emitir evento
+            yield this.publisher.publish('usuario.registrado', {
+                idUsuario: creado.id,
+                correo: creado.correo,
+                fechaRegistro: new Date()
+            });
+            return creado;
         });
     }
 }
