@@ -37,8 +37,9 @@ class AuthService {
     generarToken(payload) {
         const opciones = {
             expiresIn: this.JWT_EXPIRACION,
+            subject: String(payload.id)
         };
-        return jsonwebtoken_1.default.sign(payload, this.JWT_SECRET, opciones);
+        return jsonwebtoken_1.default.sign({ id: payload.id, correo: payload.correo }, this.JWT_SECRET, { expiresIn: this.JWT_EXPIRACION, subject: String(payload.id) });
     }
     // Verifica un JWT y retorna el payload
     verificarToken(token) {

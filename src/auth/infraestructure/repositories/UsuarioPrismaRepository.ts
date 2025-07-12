@@ -2,19 +2,23 @@ import { Usuario } from '../../domain/entities/Usuario';
 import { UsuarioRepository } from '../../domain/repositories/UsuarioRepository';
 import prisma from '../prisma/client';
 import { HistorialBusqueda, GeneroFavorito } from '@prisma/client';
+import { Email } from '../../domain/entities/Email';
+import { Password } from '../../domain/entities/Password';
+import { NivelLector } from '../../domain/entities/NivelLector';
+import { GeneroSexual } from '../../domain/entities/GeneroSexual';
 
 export class UsuarioPrismaRepository implements UsuarioRepository {
   async crear(usuario: Usuario): Promise<Usuario> {
     const creado = await prisma.usuario.create({
       data: {
         nombreUsuario: usuario.nombreUsuario,
-        correo: usuario.correo,
-        contraseñaHash: usuario.contraseñaHash,
-        nivelLector: usuario.nivelLector,
+        correo: usuario.correo.value,
+        contraseñaHash: usuario.contrasena.value,
+        nivelLector: usuario.nivelLector.value,
         puntuacionTotal: usuario.puntuacionTotal,
         rango: usuario.rango,
         edad: usuario.edad,
-        generoSexual: usuario.generoSexual,
+        generoSexual: usuario.generoSexual.value,
         objetivoLector: usuario.objetivoLector,
         paginasDiarias: usuario.paginasDiarias,
         objetivoSemanal: usuario.objetivoSemanal,
@@ -33,25 +37,25 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
 
     return new Usuario(
       creado.nombreUsuario,
-      creado.correo,
-      creado.contraseñaHash,
-      creado.nivelLector as 'principiante' | 'intermedio' | 'avanzado',
+      new Email(creado.correo),
+      new Password(creado.contraseñaHash),
+      new NivelLector(creado.nivelLector),
       creado.puntuacionTotal,
       creado.rango,
       creado.historialBusquedas.map((h: HistorialBusqueda) => h.termino),
       creado.edad,
-      creado.generoSexual,
+      new GeneroSexual(creado.generoSexual),
       creado.generosFavoritos.map((g: GeneroFavorito) => g.genero),
       creado.objetivoLector,
       creado.paginasDiarias,
       creado.objetivoSemanal,
-      creado.id 
+      creado.id
     );
   }
 
-  async buscarPorCorreo(correo: string): Promise<Usuario | null> {
+  async buscarPorCorreo(correo: Email): Promise<Usuario | null> {
     const usuarioDb = await prisma.usuario.findUnique({
-      where: { correo },
+      where: { correo: correo.value },
       include: {
         historialBusquedas: true,
         generosFavoritos: true,
@@ -62,19 +66,19 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
 
     return new Usuario(
       usuarioDb.nombreUsuario,
-      usuarioDb.correo,
-      usuarioDb.contraseñaHash,
-      usuarioDb.nivelLector as 'principiante' | 'intermedio' | 'avanzado',
+      new Email(usuarioDb.correo),
+      new Password(usuarioDb.contraseñaHash),
+      new NivelLector(usuarioDb.nivelLector),
       usuarioDb.puntuacionTotal,
       usuarioDb.rango,
       usuarioDb.historialBusquedas.map((h: HistorialBusqueda) => h.termino),
       usuarioDb.edad,
-      usuarioDb.generoSexual,
+      new GeneroSexual(usuarioDb.generoSexual),
       usuarioDb.generosFavoritos.map((g: GeneroFavorito) => g.genero),
       usuarioDb.objetivoLector,
       usuarioDb.paginasDiarias,
       usuarioDb.objetivoSemanal,
-       usuarioDb.id
+      usuarioDb.id
     );
   }
 
@@ -91,18 +95,19 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
 
     return new Usuario(
       usuarioDb.nombreUsuario,
-      usuarioDb.correo,
-      usuarioDb.contraseñaHash,
-      usuarioDb.nivelLector as 'principiante' | 'intermedio' | 'avanzado',
+      new Email(usuarioDb.correo),
+      new Password(usuarioDb.contraseñaHash),
+      new NivelLector(usuarioDb.nivelLector),
       usuarioDb.puntuacionTotal,
       usuarioDb.rango,
       usuarioDb.historialBusquedas.map((h: HistorialBusqueda) => h.termino),
       usuarioDb.edad,
-      usuarioDb.generoSexual,
+      new GeneroSexual(usuarioDb.generoSexual),
       usuarioDb.generosFavoritos.map((g: GeneroFavorito) => g.genero),
       usuarioDb.objetivoLector,
       usuarioDb.paginasDiarias,
-      usuarioDb.objetivoSemanal
+      usuarioDb.objetivoSemanal,
+      usuarioDb.id
     );
   }
 
@@ -110,22 +115,26 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
     id: number,
     datos: Partial<{
       nombreUsuario: string;
-      correo: string;
-      nivelLector: 'principiante' | 'intermedio' | 'avanzado';
+      correo: Email;
+      nivelLector: NivelLector;
       objetivoLector: string;
       edad: number;
       generosFavoritos: string[];
-      generoSexual: string;
+      generoSexual: GeneroSexual;
       paginasDiarias: number;
       objetivoSemanal: string;
     }>
   ): Promise<void> {
-    const { generosFavoritos, ...restoDatos } = datos;
-
+    const { generosFavoritos, correo, nivelLector, generoSexual, ...restoDatos } = datos;
     await prisma.$transaction([
       prisma.usuario.update({
         where: { id },
-        data: restoDatos,
+        data: {
+          ...restoDatos,
+          ...(correo ? { correo: correo.value } : {}),
+          ...(nivelLector ? { nivelLector: nivelLector.value } : {}),
+          ...(generoSexual ? { generoSexual: generoSexual.value } : {}),
+        },
       }),
       ...(generosFavoritos
         ? [
@@ -138,10 +147,10 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
     ]);
   }
 
-  async actualizarContrasena(id: number, nuevaHash: string): Promise<void> {
+  async actualizarContrasena(id: number, nueva: Password): Promise<void> {
     await prisma.usuario.update({
       where: { id },
-      data: { contraseñaHash: nuevaHash },
+      data: { contraseñaHash: nueva.value },
     });
   }
 

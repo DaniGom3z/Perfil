@@ -10,13 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ActualizarPerfil = void 0;
+const Email_1 = require("../../domain/entities/Email");
+const NivelLector_1 = require("../../domain/entities/NivelLector");
+const GeneroSexual_1 = require("../../domain/entities/GeneroSexual");
 class ActualizarPerfil {
     constructor(usuarioRepo) {
         this.usuarioRepo = usuarioRepo;
     }
     execute(idUsuario, datos) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.usuarioRepo.actualizarPerfil(idUsuario, datos);
+            const datosVO = Object.assign({}, datos);
+            if (datos.correo)
+                datosVO.correo = new Email_1.Email(datos.correo);
+            if (datos.nivelLector)
+                datosVO.nivelLector = new NivelLector_1.NivelLector(datos.nivelLector);
+            if (datos.generoSexual)
+                datosVO.generoSexual = new GeneroSexual_1.GeneroSexual(datos.generoSexual);
+            yield this.usuarioRepo.actualizarPerfil(idUsuario, datosVO);
         });
     }
 }

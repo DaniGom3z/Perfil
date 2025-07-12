@@ -1,5 +1,7 @@
-export interface UsuarioRegistradoEvent {
-  idUsuario: number;
-  correo: string;
-  fechaRegistro: Date;
+export class UsuarioRegistradoEvent {
+  constructor(
+    public readonly usuarioId: number,
+    public readonly correo: string,
+    public readonly fechaRegistro: Date
+  ) {}
 }

@@ -2,6 +2,10 @@ import { UsuarioRepository } from '../../domain/repositories/UsuarioRepository';
 import { Usuario } from '../../domain/entities/Usuario';
 import { AuthService } from '../../domain/services/AuthService';
 import { EventPublisher } from '../../domain/events/EventPublisher';
+import { Email } from '../../domain/entities/Email';
+import { Password } from '../../domain/entities/Password';
+import { NivelLector } from '../../domain/entities/NivelLector';
+import { GeneroSexual } from '../../domain/entities/GeneroSexual';
 
 
 export class RegistrarUsuario {
@@ -24,21 +28,38 @@ export class RegistrarUsuario {
     paginasDiarias: number,
     objetivoSemanal: string
   ): Promise<Usuario> {
-    const existente = await this.usuarioRepo.buscarPorCorreo(correo);
+    let emailVO: Email;
+    try {
+      emailVO = new Email(correo);
+    } catch (e) {
+      throw new Error('Correo electrónico inválido');
+    }
+
+    const existente = await this.usuarioRepo.buscarPorCorreo(emailVO);
     if (existente) throw new Error('Ya existe un usuario con ese correo');
 
-    const hash = await this.authService.hashear(passwordPlano);
+    let passwordVO: Password;
+    let nivelLectorVO: NivelLector;
+    let generoSexualVO: GeneroSexual;
+    try {
+      const hash = await this.authService.hashear(passwordPlano);
+      passwordVO = new Password(hash);
+      nivelLectorVO = new NivelLector(nivelLector);
+      generoSexualVO = new GeneroSexual(generoSexual);
+    } catch (e) {
+      throw new Error('Datos de usuario inválidos: ' + (e instanceof Error ? e.message : 'Error desconocido'));
+    }
 
     const nuevoUsuario = new Usuario(
       nombre,
-      correo,
-      hash,
-      nivelLector,
+      emailVO,
+      passwordVO,
+      nivelLectorVO,
       0,
       'lector',
       [],
       edad,
-      generoSexual,
+      generoSexualVO,
       generosFavoritos,
       objetivoLector,
       paginasDiarias,
@@ -47,11 +68,10 @@ export class RegistrarUsuario {
 
     const creado = await this.usuarioRepo.crear(nuevoUsuario);
 
-
-     // Emitir evento
+    // Emitir evento
     await this.publisher.publish('usuario.registrado', {
       idUsuario: creado.id,
-      correo: creado.correo,
+      correo: creado.correo.value,
       fechaRegistro: new Date()
     });
 

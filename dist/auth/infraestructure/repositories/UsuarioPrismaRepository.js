@@ -26,19 +26,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioPrismaRepository = void 0;
 const Usuario_1 = require("../../domain/entities/Usuario");
 const client_1 = __importDefault(require("../prisma/client"));
+const Email_1 = require("../../domain/entities/Email");
+const Password_1 = require("../../domain/entities/Password");
+const NivelLector_1 = require("../../domain/entities/NivelLector");
+const GeneroSexual_1 = require("../../domain/entities/GeneroSexual");
 class UsuarioPrismaRepository {
     crear(usuario) {
         return __awaiter(this, void 0, void 0, function* () {
             const creado = yield client_1.default.usuario.create({
                 data: {
                     nombreUsuario: usuario.nombreUsuario,
-                    correo: usuario.correo,
-                    contraseñaHash: usuario.contraseñaHash,
-                    nivelLector: usuario.nivelLector,
+                    correo: usuario.correo.value,
+                    contraseñaHash: usuario.contrasena.value,
+                    nivelLector: usuario.nivelLector.value,
                     puntuacionTotal: usuario.puntuacionTotal,
                     rango: usuario.rango,
                     edad: usuario.edad,
-                    generoSexual: usuario.generoSexual,
+                    generoSexual: usuario.generoSexual.value,
                     objetivoLector: usuario.objetivoLector,
                     paginasDiarias: usuario.paginasDiarias,
                     objetivoSemanal: usuario.objetivoSemanal,
@@ -54,13 +58,13 @@ class UsuarioPrismaRepository {
                     generosFavoritos: true,
                 },
             });
-            return new Usuario_1.Usuario(creado.nombreUsuario, creado.correo, creado.contraseñaHash, creado.nivelLector, creado.puntuacionTotal, creado.rango, creado.historialBusquedas.map((h) => h.termino), creado.edad, creado.generoSexual, creado.generosFavoritos.map((g) => g.genero), creado.objetivoLector, creado.paginasDiarias, creado.objetivoSemanal, creado.id);
+            return new Usuario_1.Usuario(creado.nombreUsuario, new Email_1.Email(creado.correo), new Password_1.Password(creado.contraseñaHash), new NivelLector_1.NivelLector(creado.nivelLector), creado.puntuacionTotal, creado.rango, creado.historialBusquedas.map((h) => h.termino), creado.edad, new GeneroSexual_1.GeneroSexual(creado.generoSexual), creado.generosFavoritos.map((g) => g.genero), creado.objetivoLector, creado.paginasDiarias, creado.objetivoSemanal, creado.id);
         });
     }
     buscarPorCorreo(correo) {
         return __awaiter(this, void 0, void 0, function* () {
             const usuarioDb = yield client_1.default.usuario.findUnique({
-                where: { correo },
+                where: { correo: correo.value },
                 include: {
                     historialBusquedas: true,
                     generosFavoritos: true,
@@ -68,7 +72,7 @@ class UsuarioPrismaRepository {
             });
             if (!usuarioDb)
                 return null;
-            return new Usuario_1.Usuario(usuarioDb.nombreUsuario, usuarioDb.correo, usuarioDb.contraseñaHash, usuarioDb.nivelLector, usuarioDb.puntuacionTotal, usuarioDb.rango, usuarioDb.historialBusquedas.map((h) => h.termino), usuarioDb.edad, usuarioDb.generoSexual, usuarioDb.generosFavoritos.map((g) => g.genero), usuarioDb.objetivoLector, usuarioDb.paginasDiarias, usuarioDb.objetivoSemanal, usuarioDb.id);
+            return new Usuario_1.Usuario(usuarioDb.nombreUsuario, new Email_1.Email(usuarioDb.correo), new Password_1.Password(usuarioDb.contraseñaHash), new NivelLector_1.NivelLector(usuarioDb.nivelLector), usuarioDb.puntuacionTotal, usuarioDb.rango, usuarioDb.historialBusquedas.map((h) => h.termino), usuarioDb.edad, new GeneroSexual_1.GeneroSexual(usuarioDb.generoSexual), usuarioDb.generosFavoritos.map((g) => g.genero), usuarioDb.objetivoLector, usuarioDb.paginasDiarias, usuarioDb.objetivoSemanal, usuarioDb.id);
         });
     }
     buscarPorId(id) {
@@ -82,16 +86,16 @@ class UsuarioPrismaRepository {
             });
             if (!usuarioDb)
                 return null;
-            return new Usuario_1.Usuario(usuarioDb.nombreUsuario, usuarioDb.correo, usuarioDb.contraseñaHash, usuarioDb.nivelLector, usuarioDb.puntuacionTotal, usuarioDb.rango, usuarioDb.historialBusquedas.map((h) => h.termino), usuarioDb.edad, usuarioDb.generoSexual, usuarioDb.generosFavoritos.map((g) => g.genero), usuarioDb.objetivoLector, usuarioDb.paginasDiarias, usuarioDb.objetivoSemanal);
+            return new Usuario_1.Usuario(usuarioDb.nombreUsuario, new Email_1.Email(usuarioDb.correo), new Password_1.Password(usuarioDb.contraseñaHash), new NivelLector_1.NivelLector(usuarioDb.nivelLector), usuarioDb.puntuacionTotal, usuarioDb.rango, usuarioDb.historialBusquedas.map((h) => h.termino), usuarioDb.edad, new GeneroSexual_1.GeneroSexual(usuarioDb.generoSexual), usuarioDb.generosFavoritos.map((g) => g.genero), usuarioDb.objetivoLector, usuarioDb.paginasDiarias, usuarioDb.objetivoSemanal, usuarioDb.id);
         });
     }
     actualizarPerfil(id, datos) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { generosFavoritos } = datos, restoDatos = __rest(datos, ["generosFavoritos"]);
+            const { generosFavoritos, correo, nivelLector, generoSexual } = datos, restoDatos = __rest(datos, ["generosFavoritos", "correo", "nivelLector", "generoSexual"]);
             yield client_1.default.$transaction([
                 client_1.default.usuario.update({
                     where: { id },
-                    data: restoDatos,
+                    data: Object.assign(Object.assign(Object.assign(Object.assign({}, restoDatos), (correo ? { correo: correo.value } : {})), (nivelLector ? { nivelLector: nivelLector.value } : {})), (generoSexual ? { generoSexual: generoSexual.value } : {})),
                 }),
                 ...(generosFavoritos
                     ? [
@@ -104,11 +108,11 @@ class UsuarioPrismaRepository {
             ]);
         });
     }
-    actualizarContrasena(id, nuevaHash) {
+    actualizarContrasena(id, nueva) {
         return __awaiter(this, void 0, void 0, function* () {
             yield client_1.default.usuario.update({
                 where: { id },
-                data: { contraseñaHash: nuevaHash },
+                data: { contraseñaHash: nueva.value },
             });
         });
     }

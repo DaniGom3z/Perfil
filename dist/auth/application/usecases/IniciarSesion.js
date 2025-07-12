@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IniciarSesion = void 0;
+const Email_1 = require("../../domain/entities/Email");
 class IniciarSesion {
     constructor(usuarioRepo, authService) {
         this.usuarioRepo = usuarioRepo;
@@ -17,13 +18,14 @@ class IniciarSesion {
     }
     execute(correo, passwordPlano) {
         return __awaiter(this, void 0, void 0, function* () {
-            const usuario = yield this.usuarioRepo.buscarPorCorreo(correo);
+            const emailVO = new Email_1.Email(correo);
+            const usuario = yield this.usuarioRepo.buscarPorCorreo(emailVO);
             if (!usuario)
                 throw new Error('Usuario no encontrado');
-            const valido = yield this.authService.comparar(passwordPlano, usuario.contraseñaHash);
+            const valido = yield this.authService.comparar(passwordPlano, usuario.contrasena.value);
             if (!valido)
                 throw new Error('Contraseña incorrecta');
-            const token = this.authService.generarToken({ id: usuario.id, correo: usuario.correo });
+            const token = this.authService.generarToken({ id: usuario.id, correo: usuario.correo.value });
             return { token };
         });
     }

@@ -30,8 +30,13 @@ export class AuthService {
   generarToken(payload: PayloadJWT): string {
     const opciones: SignOptions = {
       expiresIn: this.JWT_EXPIRACION,
+      subject: String(payload.id)
     };
-    return jwt.sign(payload, this.JWT_SECRET, opciones);
+    return jwt.sign(
+      {id: payload.id, correo: payload.correo}, 
+      this.JWT_SECRET, 
+      {expiresIn: this.JWT_EXPIRACION, subject: String(payload.id)}
+    );
   }
 
   // Verifica un JWT y retorna el payload

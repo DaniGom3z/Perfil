@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CambiarContrasena = void 0;
+const Password_1 = require("../../domain/entities/Password");
 class CambiarContrasena {
     constructor(usuarioRepo, authService) {
         this.usuarioRepo = usuarioRepo;
@@ -20,11 +21,12 @@ class CambiarContrasena {
             const usuario = yield this.usuarioRepo.buscarPorId(idUsuario);
             if (!usuario)
                 throw new Error('Usuario no encontrado');
-            const coincide = yield this.authService.comparar(passwordActual, usuario.contraseñaHash);
+            const coincide = yield this.authService.comparar(passwordActual, usuario.contrasena.value);
             if (!coincide)
                 throw new Error('Contraseña actual incorrecta');
             const nuevaHash = yield this.authService.hashear(nuevaPassword);
-            yield this.usuarioRepo.actualizarContrasena(idUsuario, nuevaHash);
+            const nuevaPasswordVO = new Password_1.Password(nuevaHash);
+            yield this.usuarioRepo.actualizarContrasena(idUsuario, nuevaPasswordVO);
         });
     }
 }
