@@ -126,5 +126,16 @@ class UsuarioPrismaRepository {
             ]);
         });
     }
+    listarTodos() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const usuariosDb = yield client_1.default.usuario.findMany({
+                include: {
+                    historialBusquedas: true,
+                    generosFavoritos: true,
+                },
+            });
+            return usuariosDb.map((usuarioDb) => new Usuario_1.Usuario(usuarioDb.nombreUsuario, new Email_1.Email(usuarioDb.correo), new Password_1.Password(usuarioDb.contraseñaHash), new NivelLector_1.NivelLector(usuarioDb.nivelLector), usuarioDb.puntuacionTotal, usuarioDb.rango, usuarioDb.historialBusquedas.map((h) => h.termino), usuarioDb.edad, new GeneroSexual_1.GeneroSexual(usuarioDb.generoSexual), usuarioDb.generosFavoritos.map((g) => g.genero), usuarioDb.objetivoLector, usuarioDb.paginasDiarias, usuarioDb.objetivoSemanal, usuarioDb.id));
+        });
+    }
 }
 exports.UsuarioPrismaRepository = UsuarioPrismaRepository;

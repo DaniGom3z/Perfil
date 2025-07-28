@@ -162,4 +162,31 @@ export class UsuarioPrismaRepository implements UsuarioRepository {
       }),
     ]);
   }
+
+
+   async listarTodos(): Promise<Usuario[]> {
+    const usuariosDb = await prisma.usuario.findMany({
+      include: {
+        historialBusquedas: true,
+        generosFavoritos: true,
+      },
+    });
+
+    return usuariosDb.map((usuarioDb) => new Usuario(
+      usuarioDb.nombreUsuario,
+      new Email(usuarioDb.correo),
+      new Password(usuarioDb.contraseñaHash),
+      new NivelLector(usuarioDb.nivelLector),
+      usuarioDb.puntuacionTotal,
+      usuarioDb.rango,
+      usuarioDb.historialBusquedas.map((h: HistorialBusqueda) => h.termino),
+      usuarioDb.edad,
+      new GeneroSexual(usuarioDb.generoSexual),
+      usuarioDb.generosFavoritos.map((g: GeneroFavorito) => g.genero),
+      usuarioDb.objetivoLector,
+      usuarioDb.paginasDiarias,
+      usuarioDb.objetivoSemanal,
+      usuarioDb.id
+    ));
+  }
 }

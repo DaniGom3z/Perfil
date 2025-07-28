@@ -12,34 +12,31 @@ export class AuthService {
 
   constructor() {
     this.JWT_SECRET = process.env.JWT_SECRET || 'secret_desarrollo';
-    this.JWT_EXPIRACION = process.env.JWT_EXPIRACION || '1d'; // Por defecto: 1 día
+    this.JWT_EXPIRACION = process.env.JWT_EXPIRACION || '1d'; 
   }
 
-  // Hashea una contraseña en texto plano
   async hashear(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
 
-  // Compara contraseña en texto plano con la versión hasheada
   async comparar(passwordPlano: string, passwordHash: string): Promise<boolean> {
     return bcrypt.compare(passwordPlano, passwordHash);
   }
 
-  // Genera un JWT con un payload que contiene id y correo
   generarToken(payload: PayloadJWT): string {
     const opciones: SignOptions = {
       expiresIn: this.JWT_EXPIRACION,
-      subject: String(payload.id)
+      subject: String(payload.id),
+      algorithm: 'HS256' 
     };
     return jwt.sign(
       {id: payload.id, correo: payload.correo}, 
       this.JWT_SECRET, 
-      {expiresIn: this.JWT_EXPIRACION, subject: String(payload.id)}
+      opciones
     );
   }
 
-  // Verifica un JWT y retorna el payload
   verificarToken(token: string): PayloadJWT {
     return jwt.verify(token, this.JWT_SECRET) as PayloadJWT;
   }

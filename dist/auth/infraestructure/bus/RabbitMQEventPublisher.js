@@ -52,7 +52,7 @@ class RabbitMQEventPublisher {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.connection && this.channel)
                 return;
-            this.connection = (yield amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost', console.log(process.env.RABBITMQ_URL)));
+            this.connection = (yield amqp.connect(process.env.RABBITMQ_URL || 'amqp://localhost'));
             this.channel = yield this.connection.createChannel();
             yield this.channel.assertExchange(this.exchange, 'topic', { durable: true });
         });

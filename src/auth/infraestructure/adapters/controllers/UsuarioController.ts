@@ -4,6 +4,7 @@ import { IniciarSesion } from '../../../application/usecases/IniciarSesion';
 import { ActualizarPerfil } from '../../../application/usecases/ActualizarPerfil';
 import { CambiarContrasena } from '../../../application/usecases/CambiarContrasena';
 import { ObtenerPerfil } from '../../../application/usecases/ObtenerPerfil';
+import { ObtenerUsuarios } from '../../../application/usecases/ObtenerUsuarios';
 
 export class UsuarioController {
   constructor(
@@ -11,7 +12,8 @@ export class UsuarioController {
     private readonly iniciarSesion: IniciarSesion,
     private readonly actualizarPerfil: ActualizarPerfil,
     private readonly cambiarContrasena: CambiarContrasena,
-    private readonly obtenerPerfil: ObtenerPerfil
+    private readonly obtenerPerfil: ObtenerPerfil,
+    private readonly obtenerUsuarios: ObtenerUsuarios
   ) {}
 
   async registro(req: Request, res: Response): Promise<void> {
@@ -91,6 +93,15 @@ export class UsuarioController {
       res.status(200).json({ message: 'Contraseña actualizada correctamente' });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  }
+
+  async listarUsuarios(req: Request, res: Response): Promise<void> {
+    try {
+      const usuarios = await this.obtenerUsuarios.execute();
+      res.status(200).json(usuarios);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   }
 }

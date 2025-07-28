@@ -11,12 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsuarioController = void 0;
 class UsuarioController {
-    constructor(registrarUsuario, iniciarSesion, actualizarPerfil, cambiarContrasena, obtenerPerfil) {
+    constructor(registrarUsuario, iniciarSesion, actualizarPerfil, cambiarContrasena, obtenerPerfil, obtenerUsuarios) {
         this.registrarUsuario = registrarUsuario;
         this.iniciarSesion = iniciarSesion;
         this.actualizarPerfil = actualizarPerfil;
         this.cambiarContrasena = cambiarContrasena;
         this.obtenerPerfil = obtenerPerfil;
+        this.obtenerUsuarios = obtenerUsuarios;
     }
     registro(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -77,6 +78,17 @@ class UsuarioController {
             }
             catch (error) {
                 res.status(400).json({ error: error.message });
+            }
+        });
+    }
+    listarUsuarios(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const usuarios = yield this.obtenerUsuarios.execute();
+                res.status(200).json(usuarios);
+            }
+            catch (error) {
+                res.status(500).json({ error: error.message });
             }
         });
     }

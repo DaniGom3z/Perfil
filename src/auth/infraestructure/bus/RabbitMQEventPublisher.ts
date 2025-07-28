@@ -13,7 +13,6 @@ export class RabbitMQEventPublisher implements EventPublisher {
 
     this.connection = (await amqp.connect(
       process.env.RABBITMQ_URL || 'amqp://localhost',
-      console.log(process.env.RABBITMQ_URL)
     )) as unknown as Conn;
 
     this.channel = await this.connection.createChannel();

@@ -9,7 +9,6 @@ export class Email {
   }
 
   static validar(valor: string): boolean {
-    // Validación simple de email
     return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(valor);
   }
 

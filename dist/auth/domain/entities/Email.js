@@ -9,7 +9,6 @@ class Email {
         this.valor = valor;
     }
     static validar(valor) {
-        // Validación simple de email
         return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(valor);
     }
     get value() {

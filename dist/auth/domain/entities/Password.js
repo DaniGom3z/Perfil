@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Password = void 0;
 class Password {
     constructor(hash) {
-        if (!hash || hash.length < 6) {
+        if (!hash || hash.length < 8) {
             throw new Error('La contraseña es muy corta');
         }
         this.hash = hash;

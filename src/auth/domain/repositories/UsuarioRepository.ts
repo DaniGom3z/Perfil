@@ -32,4 +32,7 @@ export interface UsuarioRepository {
 
   // Actualizar historial de búsqueda
   actualizarHistorial(id: number, historial: string[]): Promise<void>;
+
+  // 🔽 NUEVO: Listar todos los usuarios
+  listarTodos(): Promise<Usuario[]>;
 }
